@@ -5,7 +5,7 @@ app = Flask(__name__)
 #Index route
 @app.route("/")
 def index():
-    return "Thank you God for all !!!"
+    return render_template("index.html")
 
 #Invalid URL
 @app.errorhandler(404)
