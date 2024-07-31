@@ -7,6 +7,11 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
+#Profile route
+@app.route("/user/<name>")
+def user_profile(name):
+    return render_template("profile.html", name=name)
+
 #Invalid URL
 @app.errorhandler(404)
 def page_not_found(e) :
