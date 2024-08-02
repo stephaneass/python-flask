@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -14,6 +14,7 @@ class NamerForm(FlaskForm) :
 #Index route
 @app.route("/")
 def index():
+    flash("Welcome to our site!")
     return render_template("index.html")
 
 #Profile route
@@ -29,6 +30,7 @@ def name():
     if form.validate_on_submit():
         name = form.name.data
         form.name.data = ""
+        flash("Form submitted successfully!")
 
     return render_template("name.html", name = name, form = form)
 
