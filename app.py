@@ -17,6 +17,12 @@ class NamerForm(FlaskForm) :
     name = StringField("What is your name ?", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+# Create User Form Class
+class UsersForm(FlaskForm) :
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("E-mail", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(200), nullable=False)
@@ -49,6 +55,29 @@ def name():
         flash("Form submitted successfully!")
 
     return render_template("name.html", name = name, form = form)
+
+# Create or add new user
+@app.route("/new-user", methods=['GET', 'POST'])
+def new_user():
+    name = None
+    email = None
+    form = UsersForm()
+    # Validate form
+    if form.validate_on_submit():
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Users(name = form.name.data, email = form.email.data)
+            db.session.add(user)
+            db.session.commit()
+            flash("User added successfully!")
+
+        name = form.name.data
+        form.name.data = ""
+        form.email.data = ""
+
+    all_users = Users.query.order_by(Users.date_added)
+
+    return render_template("new_user.html", name = name, email = email, form = form, all_users = all_users)
 
 #Invalid URL
 @app.errorhandler(404)
