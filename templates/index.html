@@ -7,4 +7,12 @@
         </div>
     {% endfor %}
     <h1>Hello, God!</h1>
+    <br>
+    <p id="demo"> This is a text ... </p>
+    <br>
+    <div class="d-flex justify-content-center">
+
+        <img src="{{ url_for('static', filename='images/stephane.jpg') }}" alt="" style="width: 70%;" height="600">
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 {% endblock %}
