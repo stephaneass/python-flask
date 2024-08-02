@@ -17,6 +17,16 @@ class NamerForm(FlaskForm) :
     name = StringField("What is your name ?", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Create a String
+    def __repr__(self):
+        return '<Name %r>' % self.name
+
 #Index route
 @app.route("/")
 def index():
