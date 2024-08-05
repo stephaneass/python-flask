@@ -1,7 +1,7 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
@@ -30,6 +30,8 @@ class UsersForm(FlaskForm) :
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("E-mail", validators=[DataRequired()])
     favorte_color = StringField("Favorite Color")
+    password_hash = PasswordField("Password", validators=[DataRequired(), EqualTo("password_hash2", message="Password Must Match")])
+    password_hash2 = PasswordField("Confirm password", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 class Users(db.Model):
@@ -91,7 +93,8 @@ def new_user():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
             user = Users(name = form.name.data, email = form.email.data, 
-                         favorte_color = form.favorte_color.data)
+                         favorte_color = form.favorte_color.data,
+                         password = form.password_hash.data)
             db.session.add(user)
             db.session.commit()
             flash("User added successfully!")
@@ -100,6 +103,8 @@ def new_user():
         form.name.data = ""
         form.email.data = ""
         form.favorte_color.data = ""
+        form.password_hash.data = ""
+        form.password_hash2.data = ""
 
     all_users = Users.query.order_by(Users.date_added)
 

@@ -21,6 +21,12 @@
             {{ form.favorte_color.label(class="form-label") }}
             {{ form.favorte_color(class="form-control") }}
             <br>
+            {{ form.password_hash.label(class="form-label") }}
+            {{ form.password_hash(class="form-control", type="password") }}
+            <br>
+            {{ form.password_hash2.label(class="form-label") }}
+            {{ form.password_hash2(class="form-control", type="password") }}
+            <br>
             {{ form.submit(class="btn btn-secondary") }}
         </form>
     </div>
