@@ -8,7 +8,12 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "My Super Secret Key"
 #Config database
+# For SQLite
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+#For MySql
+## Échappez le caractère @ dans le mot de passe
+password = 'stephaneP%40ssw0rd'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://stephane:{password}@localhost/flaskers"
 #Init database
 db = SQLAlchemy(app)
 
