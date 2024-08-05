@@ -110,6 +110,18 @@ def update_user(id):
     else :
         return render_template("update_user.html", form=form, user = user)
 
+@app.route("/delete/<int:id>")
+def delete(id):
+    user = Users.query.get_or_404(id)
+    try :
+        db.session.delete(user)
+        db.session.commit()
+        flash("User deleted successfully")
+        return redirect(url_for("new_user"))
+    except :
+        flash("Whooops! An error occured")
+        return redirect(url_for("new_user"))
+    
 #Invalid URL
 @app.errorhandler(404)
 def page_not_found(e) :
