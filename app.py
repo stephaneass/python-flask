@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash
+from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -32,6 +32,7 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), nullable=False)
+    favory_color = db.Column(db.String(30))
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Create a String
@@ -83,6 +84,23 @@ def new_user():
     all_users = Users.query.order_by(Users.date_added)
 
     return render_template("new_user.html", name = name, email = email, form = form, all_users = all_users)
+
+@app.route("/user/<int:id>", methods=['GET', 'POST'])
+def update_user(id):
+    form = UsersForm()
+    user = Users.query.get_or_404(id)
+    if request.method == 'POST':
+        user.name = request.form['name']
+        user.email = request.form['email']
+        try :
+            db.session.commit()
+            flash("User updated successfully")
+            return redirect(url_for('new_user'))
+        except :
+            flash("An error occured")
+            return redirect(url_for('new_user'))
+    else :
+        return render_template("update_user.html", form=form, user = user)
 
 #Invalid URL
 @app.errorhandler(404)
