@@ -34,6 +34,12 @@ class UsersForm(FlaskForm) :
     password_hash2 = PasswordField("Confirm password", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+# Login Form Class
+class LoginForm(FlaskForm) :
+    email = StringField("E-mail", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(200), nullable=False)
@@ -104,7 +110,7 @@ def new_user():
         form.email.data = ""
         form.favorte_color.data = ""
         form.password_hash.data = ""
-        form.password_hash2.data = ""
+        form.password_hash.data = ""
 
     all_users = Users.query.order_by(Users.date_added)
 
@@ -128,6 +134,30 @@ def update_user(id):
             return redirect(url_for('new_user'))
     else :
         return render_template("update_user.html", form=form, user = user)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    email = None
+    password = None
+    form = LoginForm()
+    # Validate form
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        form.email.data = ""
+        form.password.data = ""
+        user = Users.query.filter_by(email = email).first()
+        if user is not None :
+            passed = user.verify_password(password)
+            if passed :
+                flash("Logged In Successfully")
+                return redirect(url_for("new_user"))
+            else :
+                flash("Credentials failed", category='error')
+        else :
+            flash("Credentials not corrected")
+
+    return render_template("login.html", email = email, password = password, form = form)
 
 @app.route("/delete/<int:id>")
 def delete(id):
