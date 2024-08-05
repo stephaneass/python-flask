@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "My Super Secret Key"
@@ -37,6 +38,19 @@ class Users(db.Model):
     email = db.Column(db.String(120), nullable=False)
     favorte_color = db.Column(db.String(30))
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+    #Do some password stuff!
+    password_hash = db.Column(db.String(255))
+
+    @property
+    def password(self):
+        raise AttributeError("Password is not a readable attribute")
+    
+    @password.setter
+    def password(self, pwd):
+        self.password_hash = generate_password_hash(pwd)
+
+    def verify_password(self, pwd) : 
+        return check_password_hash(self.password_hash, pwd)
 
     # Create a String
     def __repr__(self):
