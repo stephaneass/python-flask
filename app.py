@@ -3,6 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
 
 app = Flask(__name__)
@@ -16,6 +17,7 @@ password = 'stephaneP%40ssw0rd'
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://stephane:{password}@localhost/flaskers"
 #Init database
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Create a Form Class
 class NamerForm(FlaskForm) :
@@ -26,13 +28,14 @@ class NamerForm(FlaskForm) :
 class UsersForm(FlaskForm) :
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("E-mail", validators=[DataRequired()])
+    favorte_color = StringField("Favorite Color")
     submit = SubmitField("Submit")
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), nullable=False)
-    favory_color = db.Column(db.String(30))
+    favorte_color = db.Column(db.String(30))
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Create a String
@@ -67,12 +70,14 @@ def name():
 def new_user():
     name = None
     email = None
+    favorte_color = None
     form = UsersForm()
     # Validate form
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
-            user = Users(name = form.name.data, email = form.email.data)
+            user = Users(name = form.name.data, email = form.email.data, 
+                         favorte_color = form.favorte_color.data)
             db.session.add(user)
             db.session.commit()
             flash("User added successfully!")
@@ -80,10 +85,12 @@ def new_user():
         name = form.name.data
         form.name.data = ""
         form.email.data = ""
+        form.favorte_color.data = ""
 
     all_users = Users.query.order_by(Users.date_added)
 
-    return render_template("new_user.html", name = name, email = email, form = form, all_users = all_users)
+    return render_template("new_user.html", name = name, email = email, 
+                           favorte_color = favorte_color, form = form, all_users = all_users)
 
 @app.route("/user/<int:id>", methods=['GET', 'POST'])
 def update_user(id):
@@ -92,6 +99,7 @@ def update_user(id):
     if request.method == 'POST':
         user.name = request.form['name']
         user.email = request.form['email']
+        user.favorte_color = request.form['favorte_color']
         try :
             db.session.commit()
             flash("User updated successfully")

@@ -18,6 +18,9 @@
             {{ form.email.label(class="form-label") }}
             {{ form.email(class="form-control", value=user.email) }}
             <br>
+            {{ form.favorte_color.label(class="form-label") }}
+            {{ form.favorte_color(class="form-control", value=user.favorte_color) }}
+            <br>
             {{ form.submit(class="btn btn-secondary") }}
         </form>
     </div>
