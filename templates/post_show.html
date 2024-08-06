@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    
+    <h1> Post detail : </h1>
+    <div class="shadow p-3 mb-5 bg-body-tertiary rounded">
+        <h2><a href="#">{{ post.title }}</a> </h2> 
+        <small>{{ post.author }} <br>
+        {{ post.created_at }} | {{ post.slug }} </small><br><br>
+        {{ post.content }} <br><br>
+        <a href="{{url_for('posts')}}" class="btn btn-outline-secondary btn-sm">Go Back</a> <br><br>
+    </div>    
+
+    <br>
+    
+{% endblock %}

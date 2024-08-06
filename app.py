@@ -212,6 +212,11 @@ def posts():
     posts = Posts.query.order_by("created_at")
     return render_template("post_new.html", form = form, posts = posts)
 
+@app.route("/post/<int:id>")
+def show_post(id):
+    post = Posts.query.get_or_404(id)
+    return render_template("post_show.html", post = post)
+
 #Invalid URL
 @app.errorhandler(404)
 def page_not_found(e) :
