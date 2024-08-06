@@ -239,6 +239,14 @@ def edit_post(id) :
     form.content.data = post.content
     return render_template("post_edit.html", form=form)
 
+@app.route('/post/delete/<int:id>')
+def delete_post(id) :
+    post = Posts.query.get_or_404(id)
+    db.session.delete(post)
+    db.session.commit()
+    flash("Post deleted successfully")
+    return redirect(url_for('posts'))
+
 #Invalid URL
 @app.errorhandler(404)
 def page_not_found(e) :
