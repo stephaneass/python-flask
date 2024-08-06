@@ -1,11 +1,12 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, EqualTo, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from wtforms.widgets import TextArea
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "My Super Secret Key"
@@ -38,6 +39,13 @@ class UsersForm(FlaskForm) :
 class LoginForm(FlaskForm) :
     email = StringField("E-mail", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+class PostsForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    author = StringField("Author", validators=[DataRequired()])
+    slug = StringField("Slug", validators=[DataRequired()])
+    content = TextAreaField("Content", validators=[DataRequired()], widget=TextArea())
     submit = SubmitField("Submit")
 
 class Users(db.Model):
@@ -178,7 +186,32 @@ def delete(id):
     except :
         flash("Whooops! An error occured")
         return redirect(url_for("new_user"))
-    
+
+@app.route("/posts", methods=["GET", "POST"])
+def posts():
+    form = PostsForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        author = form.author.data
+        slug = form.slug.data
+        form.title.data = ""
+        form.content.data = ""
+        form.author.data = ""
+        form.slug.data = ""
+
+        post = Posts(title = title, content = content, author = author, slug = slug)
+        try : 
+            db.session.add(post)
+            db.session.commit()
+            flash("Post saved successfully")
+        except Exception as err:
+            print(f"Unexpected {err=}, {type(err)=}")
+            flash("Whoooops!!! An error occured")
+
+    posts = Posts.query.order_by("created_at")
+    return render_template("post_new.html", form = form, posts = posts)
+
 #Invalid URL
 @app.errorhandler(404)
 def page_not_found(e) :
