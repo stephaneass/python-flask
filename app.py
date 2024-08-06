@@ -151,8 +151,8 @@ def update_user(id):
     else :
         return render_template("update_user.html", form=form, user = user)
 
-@app.route("/login", methods=['GET', 'POST'])
-def login():
+@app.route("/test-login", methods=['GET', 'POST'])
+def test_login():
     email = None
     password = None
     form = LoginForm()
@@ -173,7 +173,7 @@ def login():
         else :
             flash("Credentials not corrected")
 
-    return render_template("login.html", email = email, password = password, form = form)
+    return render_template("test_login.html", email = email, password = password, form = form)
 
 @app.route("/delete/<int:id>")
 def delete(id):
