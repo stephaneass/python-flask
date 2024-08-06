@@ -217,6 +217,28 @@ def show_post(id):
     post = Posts.query.get_or_404(id)
     return render_template("post_show.html", post = post)
 
+@app.route("/post/edit/<int:id>", methods=['GET', 'POST'])
+def edit_post(id) :
+    post = Posts.query.get_or_404(id)
+    form = PostsForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.author = form.author.data
+        post.slug = form.slug.data
+        post.content = form.content.data
+        try : 
+            db.session.commit()
+            flash("Post updated successfully")
+            return redirect(url_for('posts'))
+        except Exception as err:
+            print(f"The error is {err=}")
+            flash("Whaooooops !!! An error occured")
+    form.title.data = post.title
+    form.author.data = post.author
+    form.slug.data = post.slug
+    form.content.data = post.content
+    return render_template("post_edit.html", form=form)
+
 #Invalid URL
 @app.errorhandler(404)
 def page_not_found(e) :
