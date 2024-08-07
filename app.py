@@ -106,6 +106,7 @@ def index():
 
 #Profile route
 @app.route("/user/<name>")
+@login_required
 def user_profile(name):
     return render_template("profile.html", name=name)
 
@@ -154,6 +155,7 @@ def new_user():
                            favorte_color = favorte_color, form = form, all_users = all_users)
 
 @app.route("/user/<int:id>", methods=['GET', 'POST'])
+@login_required
 def update_user(id):
     form = UsersForm()
     user = Users.query.get_or_404(id)
@@ -221,12 +223,14 @@ def login():
     return render_template("login.html", form = form)
 
 @app.route('/logout', methods=['GET', 'POST'])
+@login_required
 def logout():
     logout_user()
     flash("User logged out successfull")
     return redirect(url_for('login'))
 
 @app.route("/delete/<int:id>")
+@login_required
 def delete(id):
     user = Users.query.get_or_404(id)
     try :
@@ -239,6 +243,7 @@ def delete(id):
         return redirect(url_for("new_user"))
 
 @app.route("/posts", methods=["GET", "POST"])
+@login_required
 def posts():
     form = PostsForm()
     if form.validate_on_submit():
@@ -264,11 +269,13 @@ def posts():
     return render_template("post_new.html", form = form, posts = posts)
 
 @app.route("/post/<int:id>")
+@login_required
 def show_post(id):
     post = Posts.query.get_or_404(id)
     return render_template("post_show.html", post = post)
 
 @app.route("/post/edit/<int:id>", methods=['GET', 'POST'])
+@login_required
 def edit_post(id) :
     post = Posts.query.get_or_404(id)
     form = PostsForm()
@@ -291,6 +298,7 @@ def edit_post(id) :
     return render_template("post_edit.html", form=form)
 
 @app.route('/post/delete/<int:id>')
+@login_required
 def delete_post(id) :
     post = Posts.query.get_or_404(id)
     db.session.delete(post)

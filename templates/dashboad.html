@@ -9,8 +9,21 @@
     
     <h1>Dashboad !</h1>
     <br>
-    <p>You're logged in</p><br>
-    <a href="{{url_for('logout')}}" class="btn btn-danger">Logout</a>
+    <div class="card">
+        <div class="card-header">
+            {{ current_user.name }}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Welcome to your user dashboad...</h5>
+            <strong>Id : </strong>{{ current_user.id }}<br>
+            <strong>Name : </strong>{{ current_user.name }}<br>
+            <strong>Username : </strong>{{ current_user.username }}<br>
+            <strong>E-mail : </strong>{{ current_user.email }}<br>
+            <strong>Favorite color : </strong>{{ current_user.favorte_color }}<br>
+            <a href="url_for('logout')" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+    </div>
+    
 
     
 {% endblock %}
