@@ -22,6 +22,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://stephane:{password}@localhost/
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+#Flask-Login Stuff
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
 # Create a Form Class
 class NamerForm(FlaskForm) :
     name = StringField("What is your name ?", validators=[DataRequired()])
@@ -201,6 +210,7 @@ def login():
         if user is not None :
             passed = user.verify_password(password)
             if passed :
+                login_user(user)
                 flash("Logged In Successfully")
                 return redirect(url_for("dashboad"))
             else :
@@ -283,6 +293,7 @@ def delete_post(id) :
     return redirect(url_for('posts'))
 
 @app.route('/dashboad')
+@login_required
 def dashboad():
     return render_template('dashboad.html')
 
