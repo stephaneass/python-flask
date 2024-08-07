@@ -220,6 +220,12 @@ def login():
 
     return render_template("login.html", form = form)
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    flash("User logged out successfull")
+    return redirect(url_for('login'))
+
 @app.route("/delete/<int:id>")
 def delete(id):
     user = Users.query.get_or_404(id)
