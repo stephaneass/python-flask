@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms.widgets import TextArea
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "My Super Secret Key"
@@ -30,14 +31,21 @@ class NamerForm(FlaskForm) :
 class UsersForm(FlaskForm) :
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("E-mail", validators=[DataRequired()])
+    username = StringField("Username", validators=[DataRequired()])
     favorte_color = StringField("Favorite Color")
     password_hash = PasswordField("Password", validators=[DataRequired(), EqualTo("password_hash2", message="Password Must Match")])
     password_hash2 = PasswordField("Confirm password", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 # Login Form Class
-class LoginForm(FlaskForm) :
+class TestLoginForm(FlaskForm) :
     email = StringField("E-mail", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+# Login Form Class
+class LoginForm(FlaskForm) :
+    username = StringField("UserName", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
@@ -48,10 +56,11 @@ class PostsForm(FlaskForm):
     content = TextAreaField("Content", validators=[DataRequired()], widget=TextArea())
     submit = SubmitField("Submit")
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(20), nullable=False, unique=True)
     name = db.Column(db.String(200), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
     favorte_color = db.Column(db.String(30))
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
     #Do some password stuff!
@@ -109,13 +118,14 @@ def new_user():
     name = None
     email = None
     favorte_color = None
+    username = None
     form = UsersForm()
     # Validate form
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
-            user = Users(name = form.name.data, email = form.email.data, 
-                         favorte_color = form.favorte_color.data,
+            user = Users(username = form.username.data, name = form.name.data, 
+                         email = form.email.data, favorte_color = form.favorte_color.data,
                          password = form.password_hash.data)
             db.session.add(user)
             db.session.commit()
@@ -124,13 +134,14 @@ def new_user():
         name = form.name.data
         form.name.data = ""
         form.email.data = ""
+        form.username.data = ""
         form.favorte_color.data = ""
         form.password_hash.data = ""
-        form.password_hash.data = ""
+        form.password_hash2.data = ""
 
     all_users = Users.query.order_by(Users.date_added)
 
-    return render_template("new_user.html", name = name, email = email, 
+    return render_template("new_user.html", name = name, username = username, email = email, 
                            favorte_color = favorte_color, form = form, all_users = all_users)
 
 @app.route("/user/<int:id>", methods=['GET', 'POST'])
@@ -155,7 +166,7 @@ def update_user(id):
 def test_login():
     email = None
     password = None
-    form = LoginForm()
+    form = TestLoginForm()
     # Validate form
     if form.validate_on_submit():
         email = form.email.data
@@ -174,6 +185,30 @@ def test_login():
             flash("Credentials not corrected")
 
     return render_template("test_login.html", email = email, password = password, form = form)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    username = None
+    password = None
+    form = LoginForm()
+    # Validate form
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        form.username.data = ""
+        form.password.data = ""
+        user = Users.query.filter_by(username = username).first()
+        if user is not None :
+            passed = user.verify_password(password)
+            if passed :
+                flash("Logged In Successfully")
+                return redirect(url_for("dashboad"))
+            else :
+                flash("Credentials failed", category='error')
+        else :
+            flash("Credentials not corrected")
+
+    return render_template("login.html", form = form)
 
 @app.route("/delete/<int:id>")
 def delete(id):
@@ -246,6 +281,10 @@ def delete_post(id) :
     db.session.commit()
     flash("Post deleted successfully")
     return redirect(url_for('posts'))
+
+@app.route('/dashboad')
+def dashboad():
+    return render_template('dashboad.html')
 
 #Invalid URL
 @app.errorhandler(404)
