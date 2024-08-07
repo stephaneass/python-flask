@@ -33,7 +33,7 @@ class LoginForm(FlaskForm) :
 
 class PostsForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
-    author = StringField("Author", validators=[DataRequired()])
+    author = StringField("Author")
     slug = StringField("Slug", validators=[DataRequired()])
     content = TextAreaField("Content", validators=[DataRequired()], widget=TextArea())
     submit = SubmitField("Submit")

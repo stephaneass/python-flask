@@ -38,6 +38,9 @@ class Users(db.Model, UserMixin):
     #Do some password stuff!
     password_hash = db.Column(db.String(255))
 
+    # relationship
+    posts = db.relationship('Posts', backref='user')
+
     @property
     def password(self):
         raise AttributeError("Password is not a readable attribute")
@@ -57,9 +60,11 @@ class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(120), nullable=False)
+    author = db.Column(db.String(120))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     slug = db.Column(db.String(255))
+    #add foreign key
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 #Index route
 @app.route("/")
@@ -212,14 +217,13 @@ def posts():
     if form.validate_on_submit():
         title = form.title.data
         content = form.content.data
-        author = form.author.data
         slug = form.slug.data
         form.title.data = ""
         form.content.data = ""
         form.author.data = ""
         form.slug.data = ""
 
-        post = Posts(title = title, content = content, author = author, slug = slug)
+        post = Posts(title = title, content = content, user_id = current_user.id, slug = slug)
         try : 
             db.session.add(post)
             db.session.commit()
